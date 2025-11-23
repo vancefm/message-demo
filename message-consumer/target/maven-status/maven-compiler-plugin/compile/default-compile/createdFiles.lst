@@ -1,3 +1,0 @@
-com\local\message_consumer\MessageConsumerApplication.class
-com\local\message_consumer\service\MessageConsumerListener.class
-com\local\message_consumer\config\ConsumerRabbitMQConfig.class
