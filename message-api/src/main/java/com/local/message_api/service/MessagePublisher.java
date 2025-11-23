@@ -1,65 +1,82 @@
 package com.local.message_api.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local.message_api.config.RabbitMQConfig;
+import com.local.message_api.model.*;
+import com.local.message_api.repository.OutboxRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
-import com.local.message_api.config.RabbitMQConfig;
-import com.local.message_api.model.Square;
-import com.local.message_api.model.Circle;
-import com.local.message_api.model.Pentagon;
+import java.util.UUID;
 
 @Service
 public class MessagePublisher {
-
     private static final Logger logger = LoggerFactory.getLogger(MessagePublisher.class);
 
-    private final RabbitTemplate rabbitTemplate;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
-    public MessagePublisher(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
-
-    public void publishHelloMessage(String message) {
-        logger.info("Publishing message to RabbitMQ: {}", message);
-        try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.SQUARE_ROUTING_KEY, message);
-            logger.info("Message published successfully to routing key: {}", RabbitMQConfig.SQUARE_ROUTING_KEY);
-        } catch (Exception ex) {
-            logger.error("Failed to publish message to RabbitMQ: {}", ex.getMessage(), ex);
-        }
-    }
+    public MessagePublisher(OutboxRepository outboxRepository, ObjectMapper objectMapper) {
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;}
 
     public void publishSquare(Square square) {
-        logger.info("Publishing Square to RabbitMQ with routing key: {}", RabbitMQConfig.SQUARE_ROUTING_KEY);
+        logger.info("Writing Square to outbox");
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.SQUARE_ROUTING_KEY, square.toString());
-            logger.info("Square published successfully: {}", square);
+            String payload = objectMapper.writeValueAsString(square);
+            OutboxEvent event = new OutboxEvent(
+                    UUID.randomUUID().toString(),
+                    "Square",
+                    payload,
+                    RabbitMQConfig.SQUARE_ROUTING_KEY
+            );
+            outboxRepository.save(event);
+            logger.info("Square saved to outbox with id: {}", event.getId());
         } catch (Exception ex) {
-            logger.error("Failed to publish Square: {}", ex.getMessage(), ex);
+            logger.error("Failed to save Square to outbox: {}", ex.getMessage(), ex);
         }
     }
 
     public void publishCircle(Circle circle) {
-        logger.info("Publishing Circle to RabbitMQ with routing key: {}", RabbitMQConfig.CIRCLE_ROUTING_KEY);
+        logger.info("Writing Circle to outbox");
         try {
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.CIRCLE_ROUTING_KEY, circle.toString());
-            logger.info("Circle published successfully: {}", circle);
+            String payload = objectMapper.writeValueAsString(circle);
+            OutboxEvent event = new OutboxEvent(
+                    UUID.randomUUID().toString(),
+                    "Circle",
+                    payload,
+                    RabbitMQConfig.CIRCLE_ROUTING_KEY
+            );
+            outboxRepository.save(event);
+            logger.info("Circle saved to outbox with id: {}", event.getId());
         } catch (Exception ex) {
-            logger.error("Failed to publish Circle: {}", ex.getMessage(), ex);
+            logger.error("Failed to save Circle to outbox: {}", ex.getMessage(), ex);
         }
     }
 
     public void publishPentagon(Pentagon pentagon) {
-        logger.info("Publishing Pentagon to RabbitMQ with routing keys: {} and {}", 
-                RabbitMQConfig.PENTAGON_ROUTING_KEY_1, RabbitMQConfig.PENTAGON_ROUTING_KEY_2);
+        logger.info("Writing Pentagon to outbox (with 2 routing keys)");
         try {
-            // Pentagon uses two routing keys, so publish twice
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.PENTAGON_ROUTING_KEY_1, pentagon.toString());
-            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.PENTAGON_ROUTING_KEY_2, pentagon.toString());
-            logger.info("Pentagon published successfully: {}", pentagon);
+            String payload = objectMapper.writeValueAsString(pentagon);
+            
+            // Pentagon publishes to two routing keys, so create two outbox events
+            OutboxEvent event1 = new OutboxEvent(
+                    UUID.randomUUID().toString(),
+                    "Pentagon",
+                    payload,
+                    RabbitMQConfig.PENTAGON_ROUTING_KEY_1
+            );
+            OutboxEvent event2 = new OutboxEvent(
+                    UUID.randomUUID().toString(),
+                    "Pentagon",
+                    payload,
+                    RabbitMQConfig.PENTAGON_ROUTING_KEY_2
+            );
+            outboxRepository.save(event1);
+            outboxRepository.save(event2);
+            logger.info("Pentagon saved to outbox with ids: {} and {}", event1.getId(), event2.getId());
         } catch (Exception ex) {
-            logger.error("Failed to publish Pentagon: {}", ex.getMessage(), ex);
+            logger.error("Failed to save Pentagon to outbox: {}", ex.getMessage(), ex);
         }
     }
 

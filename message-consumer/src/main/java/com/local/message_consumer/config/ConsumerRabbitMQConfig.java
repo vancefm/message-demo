@@ -15,13 +15,11 @@ public class ConsumerRabbitMQConfig {
     public static final String EXCHANGE_NAME = "shapes.exchange";
 
     // Queues
-    public static final String HELLO_QUEUE = "hello.queue";
     public static final String SQUARE_QUEUE = "square.queue";
     public static final String CIRCLE_QUEUE = "circle.queue";
     public static final String PENTAGON_QUEUE = "pentagon.queue";
 
     // Routing Keys
-    public static final String HELLO_ROUTING_KEY = "hello";
     public static final String SQUARE_ROUTING_KEY = "shape.square";
     public static final String CIRCLE_ROUTING_KEY = "shape.circle";
     public static final String PENTAGON_ROUTING_KEY_1 = "shape.pentagon.1";
@@ -30,11 +28,6 @@ public class ConsumerRabbitMQConfig {
     @Bean
     public DirectExchange shapesExchange() {
         return new DirectExchange(EXCHANGE_NAME, true, false);
-    }
-
-    @Bean
-    public Queue helloQueue() {
-        return new Queue(HELLO_QUEUE, true);
     }
 
     @Bean
@@ -50,13 +43,6 @@ public class ConsumerRabbitMQConfig {
     @Bean
     public Queue pentagonQueue() {
         return new Queue(PENTAGON_QUEUE, true);
-    }
-
-    @Bean
-    public Binding helloBinding(@Qualifier("helloQueue") Queue helloQueue, DirectExchange shapesExchange) {
-        return BindingBuilder.bind(helloQueue)
-                .to(shapesExchange)
-                .with(HELLO_ROUTING_KEY);
     }
 
     @Bean

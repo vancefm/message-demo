@@ -19,14 +19,6 @@ public class ShapeController {
         this.messagePublisher = messagePublisher;
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        logger.info("Hello World!");
-        String message = "Hello World! at " + System.currentTimeMillis();
-        messagePublisher.publishHelloMessage(message);
-        return "Message sent: " + message;
-    }
-
     @GetMapping("/square")
     public String publishSquare() {
         logger.info("Publishing Square");

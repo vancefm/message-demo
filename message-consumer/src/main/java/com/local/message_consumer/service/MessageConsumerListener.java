@@ -10,11 +10,6 @@ public class MessageConsumerListener {
 
     private static final Logger logger = LoggerFactory.getLogger(MessageConsumerListener.class);
 
-    @RabbitListener(queues = "hello.queue")
-    public void receiveHello(String message) {
-        logger.info("Received from hello.queue: {}", message);
-    }
-
     @RabbitListener(queues = "square.queue")
     public void receiveSquare(String message) {
         logger.info("Received Square from square.queue (routing key: shape.square): {}", message);
