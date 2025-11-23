@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "message-api",
+            "request": "launch",
+            "mainClass": "com.local.message_api.MessageApiApplication",
+            "projectName": "message-api",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "java",
+            "name": "message-consumer",
+            "request": "launch",
+            "mainClass": "com.local.message_consumer.MessageConsumerApplication",
+            "projectName": "message-consumer",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+    ],
+    "compounds": [
+            {
+                "name": "All Services",
+                "configurations": ["message-api", "message-consumer"]
+            }
+    ]
+}
